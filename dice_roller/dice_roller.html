@@ -142,7 +142,7 @@
                 const sides = parseInt(button.dataset.sides);
                 let rolls = diceForm.elements.dice.value;
                 let modifier = diceForm.elements.modifier.value;
-                rolls = parseInt(rolls) || 1;
+                rolls = Math.max(1, parseInt(rolls) || 1);
                 modifier = parseInt(modifier) || 0;
                 let rollsArray = [];
                 let total = 0;
@@ -171,9 +171,9 @@
         });
 
         rollCustomDiceBtn.addEventListener('click', () => {
-            let rolls = parseInt(diceForm.elements.dice.value) || 1;
+            let rolls = Math.max(1, parseInt(diceForm.elements.dice.value) || 1);
             let modifier = parseInt(diceForm.elements.modifier.value) || 0;
-            let sides = parseInt(customSidesInput.value) || 10;
+            let sides = Math.max(2, parseInt(customSidesInput.value) || 10);
             let rollsArray = [];
             let total = 0;
             for (let i = 0; i < rolls; i++) {
@@ -190,9 +190,6 @@
                 rollStr += ` + ${modifier}`;
             }
             rollStr += ` = ${total}`;
-            if (rolls > 1) {
-                rollStr += ` (${total - modifier})`;
-            }
             rollStr += `<br>`;
             history.innerHTML = rollStr + history.innerHTML;
             history.scrollTop = 0;

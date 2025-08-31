@@ -46,8 +46,13 @@ class SearchInterface {
      * Parse URL parameters into an object
      */
     parseUrlParams(url = window.location.href) {
-        const urlObj = new URL(url);
-        return urlObj.searchParams;
+        try {
+            const urlObj = new URL(url);
+            return urlObj.searchParams;
+        } catch (error) {
+            // Return empty URLSearchParams if URL is invalid
+            return new URLSearchParams();
+        }
     }
 
     /**
@@ -114,10 +119,12 @@ class SearchInterface {
      * Highlight search terms in text
      */
     highlightText(text, query) {
-        if (!query) return text;
+        if (!query || !text) return text;
         
+        // Escape HTML to prevent XSS
+        const escapedText = this.escapeHtml(text);
         const words = query.split(/\s+/).filter(word => word.length > 0);
-        let highlightedText = text;
+        let highlightedText = escapedText;
         
         words.forEach(word => {
             const regex = new RegExp(`(${this.escapeRegExp(word)})`, 'gi');
@@ -125,6 +132,15 @@ class SearchInterface {
         });
         
         return highlightedText;
+    }
+
+    /**
+     * Escape HTML characters to prevent XSS
+     */
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     /**
@@ -138,10 +154,17 @@ class SearchInterface {
      * Generate text snippet with highlighted search terms
      */
     generateSnippet(content, query, maxLength = 200) {
+        if (!content || !query) return '';
+        
         const words = query.toLowerCase().split(/\s+/);
         
         let bestPos = 0;
         let maxMatches = 0;
+        
+        // Ensure content is long enough to process
+        if (content.length <= maxLength) {
+            return this.highlightText(content, query);
+        }
         
         for (let i = 0; i < content.length - maxLength; i += 20) {
             const snippet = content.substr(i, maxLength).toLowerCase();
@@ -170,14 +193,14 @@ class SearchInterface {
         if (!doc) return '';
 
         const snippet = this.generateSnippet(doc.content, query);
-        const categoryInfo = doc.category && doc.category !== 'root' ? ` > ${doc.category}` : '';
+        const categoryInfo = doc.category && doc.category !== 'root' ? ` > ${this.escapeHtml(doc.category)}` : '';
         
         return `
             <div class="result-item">
                 <div class="result-title">
-                    <a href="${doc.url}" target="_blank">${this.highlightText(doc.title, query)}</a>
+                    <a href="${this.escapeHtml(doc.url)}" target="_blank">${this.highlightText(doc.title, query)}</a>
                 </div>
-                <div class="result-source">${doc.source}${categoryInfo}</div>
+                <div class="result-source">${this.escapeHtml(doc.source)}${categoryInfo}</div>
                 <div class="result-snippet">${snippet}</div>
             </div>
         `;

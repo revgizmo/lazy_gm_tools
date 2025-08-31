@@ -45,7 +45,15 @@ function addCommasToNumber(num) {
 // Helper function to process quantity ranges like [[100-500]]
 function processQuantityRanges(text, useCommas = false) {
     return text.replace(/\[\[(\d+)-(\d+)\]\]/g, (match, min, max) => {
-        const value = Math.floor(Math.random() * (parseInt(max) - parseInt(min) + 1)) + parseInt(min);
+        const minVal = parseInt(min);
+        const maxVal = parseInt(max);
+        
+        // Ensure min is less than or equal to max
+        if (minVal > maxVal) {
+            return match; // Return original if invalid range
+        }
+        
+        const value = Math.floor(Math.random() * (maxVal - minVal + 1)) + minVal;
         return useCommas ? addCommasToNumber(value) : value.toLocaleString();
     });
 }
@@ -204,9 +212,11 @@ function fillTemplate(template, data, useCommas = false) {
     // Process template in multiple passes until no more changes
     let iterations = 0;
     const maxIterations = 10; // Safety limit to prevent infinite loops
+    let previousResult = '';
     
-    while ((result.includes('{') || result.includes('[[')) && iterations < maxIterations) {
+    while ((result.includes('{') || result.includes('[[')) && iterations < maxIterations && result !== previousResult) {
         iterations++;
+        previousResult = result;
         
         // Process each type of template syntax
         result = processQuantityRanges(result, useCommas);
@@ -234,11 +244,20 @@ function generateContent() {
         const template = pick(templates);
         const result = fillTemplate(template, parsed);
         const capitalizedResult = result.charAt(0).toUpperCase() + result.slice(1);
-        html += '<li>' + capitalizedResult + '</li>';
+        // Escape HTML to prevent XSS
+        const escapedResult = escapeHtml(capitalizedResult);
+        html += '<li>' + escapedResult + '</li>';
     }
     
     html += '</ol>';
     output.innerHTML = html;
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Treasure-specific generator function
@@ -268,7 +287,8 @@ function generateTreasure() {
     const items = result.split('<br>')
         .map(item => item.trim())
         .filter(item => item !== '')
-        .map(item => '- ' + item.charAt(0).toUpperCase() + item.slice(1));
+        .map(item => '- ' + item.charAt(0).toUpperCase() + item.slice(1))
+        .map(item => escapeHtml(item));
     
     output.innerHTML = '<p>' + items.join('<br>') + '</p>';
 }
