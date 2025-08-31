@@ -329,6 +329,11 @@ downloadBtn.addEventListener('click', () => {
     return;
   }
   
+  if (!canvas) {
+    alert('Canvas not initialized. Please refresh the page and try again.');
+    return;
+  }
+  
   try {
     render();
     

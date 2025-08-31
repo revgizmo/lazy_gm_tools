@@ -200,6 +200,7 @@ class SearchFilters {
      */
     setupSourceFilters() {
         if (!this.sourceMetadata || !Array.isArray(this.sourceMetadata) || this.sourceMetadata.length === 0) {
+            console.warn('No source metadata available for filter setup');
             return;
         }
         
@@ -408,7 +409,10 @@ class SearchFilters {
         const filterToggle = document.getElementById('filterToggle');
         const filterContent = document.getElementById('filterContent');
         
-        if (!filterToggle || !filterContent) return;
+        if (!filterToggle || !filterContent) {
+            console.error('Filter toggle elements not found');
+            return;
+        }
         
         filterToggle.classList.toggle('collapsed');
         filterContent.classList.toggle('collapsed');

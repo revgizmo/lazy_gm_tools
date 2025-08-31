@@ -304,7 +304,12 @@ function decreaseScore(ability) {
 
 function validateScore(ability) {
     const input = document.getElementById(ability + '-score');
-    let value = parseInt(input.value) || MIN_SCORE;
+    let value = parseInt(input.value);
+    
+    // Handle NaN and invalid inputs
+    if (isNaN(value)) {
+        value = MIN_SCORE;
+    }
     
     // If they type something higher than 15, set it to 15
     if (value > MAX_SCORE) {

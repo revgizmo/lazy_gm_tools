@@ -59,37 +59,41 @@ class SearchInterface {
      * Update URL parameters without reload
      */
     updateUrlParameters(query = null, additionalParams = {}) {
-        const url = new URL(window.location);
-        
-        // Update query parameter
-        if (query !== null) {
-            if (query.trim()) {
-                url.searchParams.set('q', query.trim());
-            } else {
-                url.searchParams.delete('q');
+        try {
+            const url = new URL(window.location);
+            
+            // Update query parameter
+            if (query !== null) {
+                if (query.trim()) {
+                    url.searchParams.set('q', query.trim());
+                } else {
+                    url.searchParams.delete('q');
+                }
             }
-        }
-        
-        // Clear existing filter parameters
-        ['r', 'm', 's', 'i'].forEach(param => {
-            url.searchParams.delete(param);
-        });
-        
-        // Update sources parameters
-        const sourceParams = window.searchFilters ? window.searchFilters.encodeSourceFiltersToUrl() : {};
-        Object.entries(sourceParams).forEach(([param, value]) => {
-            url.searchParams.set(param, value);
-        });
-        
-        // Add any additional parameters
-        Object.entries(additionalParams).forEach(([param, value]) => {
-            if (value !== null && value !== undefined) {
+            
+            // Clear existing filter parameters
+            ['r', 'm', 's', 'i'].forEach(param => {
+                url.searchParams.delete(param);
+            });
+            
+            // Update sources parameters
+            const sourceParams = window.searchFilters ? window.searchFilters.encodeSourceFiltersToUrl() : {};
+            Object.entries(sourceParams).forEach(([param, value]) => {
                 url.searchParams.set(param, value);
-            }
-        });
-        
-        // Update browser history without reload
-        window.history.replaceState({}, '', url);
+            });
+            
+            // Add any additional parameters
+            Object.entries(additionalParams).forEach(([param, value]) => {
+                if (value !== null && value !== undefined) {
+                    url.searchParams.set(param, value);
+                }
+            });
+            
+            // Update browser history without reload
+            window.history.replaceState({}, '', url);
+        } catch (error) {
+            console.error('Error updating URL parameters:', error);
+        }
     }
 
     /**
@@ -105,7 +109,15 @@ class SearchInterface {
      */
     setupSearchInput(inputId, onSearchCallback) {
         const searchInput = document.getElementById(inputId);
-        if (!searchInput) return;
+        if (!searchInput) {
+            console.error(`Search input with id '${inputId}' not found`);
+            return;
+        }
+
+        if (typeof onSearchCallback !== 'function') {
+            console.error('onSearchCallback must be a function');
+            return;
+        }
 
         searchInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -200,7 +212,10 @@ class SearchInterface {
      */
     displaySearchStats(resultCount, query, containerId = 'searchStats') {
         const statsContainer = document.getElementById(containerId);
-        if (!statsContainer) return;
+        if (!statsContainer) {
+            console.error(`Stats container with id '${containerId}' not found`);
+            return;
+        }
 
         if (resultCount === 0) {
             statsContainer.style.display = 'none';
@@ -218,6 +233,8 @@ class SearchInterface {
         const resultsContainer = document.getElementById(containerId);
         if (resultsContainer) {
             resultsContainer.innerHTML = '<div class="no-results">No results found for your search.</div>';
+        } else {
+            console.error(`Results container with id '${containerId}' not found`);
         }
     }
 

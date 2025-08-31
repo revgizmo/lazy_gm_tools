@@ -238,6 +238,17 @@ function generateContent() {
     delete parsed.template;
 
     const output = document.getElementById('output');
+    if (!output) {
+        console.error('Output element not found');
+        return;
+    }
+    
+    // Check if we have valid data
+    if (!templates || templates.length === 0 || (templates.length === 1 && templates[0] === '')) {
+        output.innerHTML = '<p>No template data available for generation.</p>';
+        return;
+    }
+    
     let html = '<ol>';
     
     for (let i = 0; i < 10; i++) {
@@ -264,6 +275,17 @@ function generateTreasure() {
     const tier = tierElement.value;
     const parsed = parseInput(window.dataText || dataText);
     const output = document.getElementById('output');
+    
+    if (!output) {
+        console.error('Output element not found');
+        return;
+    }
+    
+    // Check if we have valid tier data
+    if (!parsed[tier] || !Array.isArray(parsed[tier]) || parsed[tier].length === 0) {
+        output.innerHTML = '<p>No treasure data available for the selected tier.</p>';
+        return;
+    }
     
     let result = pick(parsed[tier]);
     

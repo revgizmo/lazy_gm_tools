@@ -661,29 +661,123 @@ function renderCombatTable() {
             row.classList.add('current-turn');
         }
         
-        row.innerHTML = `
-            <td><input type="number" value="${combatant.initiative}" onchange="updateInitiative(${combatant.id}, this.value)" class="transparent-input" min="1" max="30"></td>
-            <td style="position: relative; padding-right: 100px;">
-                <div style="display: flex; align-items: center; height: 100%;">
-                    <input type="text" value="${combatant.name}" onchange="updateName(${combatant.id}, this.value)" class="transparent-input" style="flex: 1;">
-                    
-                    ${getMonsterLink(combatant)}
-                    <button onclick="removeCombatant(${combatant.id})" title="Remove" class="remove-button" style="position: absolute; right: 5px; font-size: 18px !important; font-weight: bold; line-height: 18px !important; padding: 4px 10px !important;">×</button>
-                </div>
-            </td>
-            <td><input type="number" value="${combatant.ac || ''}" onchange="updateAC(${combatant.id}, this.value)" class="transparent-input" min="1" max="30" placeholder="-"></td>
-            ${combatant.maxHp ? `<td>
-                <div class="hp-controls">
-                    <button onclick="modifyHp(${combatant.id}, 5)" class="hp-button">+5</button>
-                    <button onclick="modifyHp(${combatant.id}, 1)" class="hp-button">+1</button>
-                    <input type="text" value="${combatant.currentHp}" onchange="setHp(${combatant.id}, this.value)" class="hp-input">
-                    <span style="font-size: 16px;">/ </span>
-                    <input type="number" value="${combatant.maxHp}" onchange="setMaxHp(${combatant.id}, this.value)" min="1" class="hp-input">
-                    <button onclick="modifyHp(${combatant.id}, -1)" class="hp-button">-1</button>
-                    <button onclick="modifyHp(${combatant.id}, -5)" class="hp-button">-5</button>
-                </div>
-            </td>` : '<td>-</td>'}
-        `;
+        // Create elements safely to avoid XSS
+        const initiativeCell = document.createElement('td');
+        const initiativeInput = document.createElement('input');
+        initiativeInput.type = 'number';
+        initiativeInput.value = combatant.initiative;
+        initiativeInput.className = 'transparent-input';
+        initiativeInput.min = '1';
+        initiativeInput.max = '30';
+        initiativeInput.onchange = () => updateInitiative(combatant.id, initiativeInput.value);
+        initiativeCell.appendChild(initiativeInput);
+        
+        const nameCell = document.createElement('td');
+        nameCell.style.position = 'relative';
+        nameCell.style.paddingRight = '100px';
+        
+        const nameDiv = document.createElement('div');
+        nameDiv.style.display = 'flex';
+        nameDiv.style.alignItems = 'center';
+        nameDiv.style.height = '100%';
+        
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.value = combatant.name;
+        nameInput.className = 'transparent-input';
+        nameInput.style.flex = '1';
+        nameInput.onchange = () => updateName(combatant.id, nameInput.value);
+        
+        const monsterLink = getMonsterLink(combatant);
+        if (monsterLink) {
+            nameDiv.appendChild(monsterLink);
+        }
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.onclick = () => removeCombatant(combatant.id);
+        removeBtn.title = 'Remove';
+        removeBtn.className = 'remove-button';
+        removeBtn.style.position = 'absolute';
+        removeBtn.style.right = '5px';
+        removeBtn.style.fontSize = '18px !important';
+        removeBtn.style.fontWeight = 'bold';
+        removeBtn.style.lineHeight = '18px !important';
+        removeBtn.style.padding = '4px 10px !important';
+        removeBtn.textContent = '×';
+        
+        nameDiv.appendChild(nameInput);
+        nameDiv.appendChild(removeBtn);
+        nameCell.appendChild(nameDiv);
+        
+        const acCell = document.createElement('td');
+        const acInput = document.createElement('input');
+        acInput.type = 'number';
+        acInput.value = combatant.ac || '';
+        acInput.className = 'transparent-input';
+        acInput.min = '1';
+        acInput.max = '30';
+        acInput.placeholder = '-';
+        acInput.onchange = () => updateAC(combatant.id, acInput.value);
+        acCell.appendChild(acInput);
+        
+        const hpCell = document.createElement('td');
+        if (combatant.maxHp) {
+            const hpDiv = document.createElement('div');
+            hpDiv.className = 'hp-controls';
+            
+            const plus5Btn = document.createElement('button');
+            plus5Btn.onclick = () => modifyHp(combatant.id, 5);
+            plus5Btn.className = 'hp-button';
+            plus5Btn.textContent = '+5';
+            
+            const plus1Btn = document.createElement('button');
+            plus1Btn.onclick = () => modifyHp(combatant.id, 1);
+            plus1Btn.className = 'hp-button';
+            plus1Btn.textContent = '+1';
+            
+            const hpInput = document.createElement('input');
+            hpInput.type = 'text';
+            hpInput.value = combatant.currentHp;
+            hpInput.className = 'hp-input';
+            hpInput.onchange = () => setHp(combatant.id, hpInput.value);
+            
+            const slashSpan = document.createElement('span');
+            slashSpan.style.fontSize = '16px';
+            slashSpan.textContent = '/ ';
+            
+            const maxHpInput = document.createElement('input');
+            maxHpInput.type = 'number';
+            maxHpInput.value = combatant.maxHp;
+            maxHpInput.className = 'hp-input';
+            maxHpInput.min = '1';
+            maxHpInput.onchange = () => setMaxHp(combatant.id, maxHpInput.value);
+            
+            const minus1Btn = document.createElement('button');
+            minus1Btn.onclick = () => modifyHp(combatant.id, -1);
+            minus1Btn.className = 'hp-button';
+            minus1Btn.textContent = '-1';
+            
+            const minus5Btn = document.createElement('button');
+            minus5Btn.onclick = () => modifyHp(combatant.id, -5);
+            minus5Btn.className = 'hp-button';
+            minus5Btn.textContent = '-5';
+            
+            hpDiv.appendChild(plus5Btn);
+            hpDiv.appendChild(plus1Btn);
+            hpDiv.appendChild(hpInput);
+            hpDiv.appendChild(slashSpan);
+            hpDiv.appendChild(maxHpInput);
+            hpDiv.appendChild(minus1Btn);
+            hpDiv.appendChild(minus5Btn);
+            hpCell.appendChild(hpDiv);
+        } else {
+            hpCell.textContent = '-';
+        }
+        
+        row.appendChild(initiativeCell);
+        row.appendChild(nameCell);
+        row.appendChild(acCell);
+        row.appendChild(hpCell);
         
         tbody.appendChild(row);
     });
