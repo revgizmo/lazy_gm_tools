@@ -41,9 +41,9 @@ class SearchFilters {
         // Auto-generate codes for any sources not manually mapped
         const allSources = new Set();
         this.sourceMetadata.forEach(item => {
-            if (item.type === 'ruleset') {
+            if (item && item.type === 'ruleset' && item.source) {
                 allSources.add(item.source);
-            } else {
+            } else if (item && item.category) {
                 allSources.add(item.category);
             }
         });
@@ -199,7 +199,8 @@ class SearchFilters {
      * Setup source filter UI
      */
     setupSourceFilters() {
-        if (!this.sourceMetadata || this.sourceMetadata.length === 0) {
+        if (!this.sourceMetadata || !Array.isArray(this.sourceMetadata) || this.sourceMetadata.length === 0) {
+            console.warn('No source metadata available for filter setup');
             return;
         }
         
@@ -408,7 +409,10 @@ class SearchFilters {
         const filterToggle = document.getElementById('filterToggle');
         const filterContent = document.getElementById('filterContent');
         
-        if (!filterToggle || !filterContent) return;
+        if (!filterToggle || !filterContent) {
+            console.error('Filter toggle elements not found');
+            return;
+        }
         
         filterToggle.classList.toggle('collapsed');
         filterContent.classList.toggle('collapsed');

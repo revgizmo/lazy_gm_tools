@@ -45,7 +45,15 @@ function addCommasToNumber(num) {
 // Helper function to process quantity ranges like [[100-500]]
 function processQuantityRanges(text, useCommas = false) {
     return text.replace(/\[\[(\d+)-(\d+)\]\]/g, (match, min, max) => {
-        const value = Math.floor(Math.random() * (parseInt(max) - parseInt(min) + 1)) + parseInt(min);
+        const minVal = parseInt(min);
+        const maxVal = parseInt(max);
+        
+        // Ensure min is less than or equal to max
+        if (minVal > maxVal) {
+            return match; // Return original if invalid range
+        }
+        
+        const value = Math.floor(Math.random() * (maxVal - minVal + 1)) + minVal;
         return useCommas ? addCommasToNumber(value) : value.toLocaleString();
     });
 }
@@ -204,9 +212,11 @@ function fillTemplate(template, data, useCommas = false) {
     // Process template in multiple passes until no more changes
     let iterations = 0;
     const maxIterations = 10; // Safety limit to prevent infinite loops
+    let previousResult = '';
     
-    while ((result.includes('{') || result.includes('[[')) && iterations < maxIterations) {
+    while ((result.includes('{') || result.includes('[[')) && iterations < maxIterations && result !== previousResult) {
         iterations++;
+        previousResult = result;
         
         // Process each type of template syntax
         result = processQuantityRanges(result, useCommas);
@@ -228,6 +238,17 @@ function generateContent() {
     delete parsed.template;
 
     const output = document.getElementById('output');
+    if (!output) {
+        console.error('Output element not found');
+        return;
+    }
+    
+    // Check if we have valid data
+    if (!templates || templates.length === 0 || (templates.length === 1 && templates[0] === '')) {
+        output.innerHTML = '<p>No template data available for generation.</p>';
+        return;
+    }
+    
     let html = '<ol>';
     
     for (let i = 0; i < 10; i++) {
@@ -254,6 +275,17 @@ function generateTreasure() {
     const tier = tierElement.value;
     const parsed = parseInput(window.dataText || dataText);
     const output = document.getElementById('output');
+    
+    if (!output) {
+        console.error('Output element not found');
+        return;
+    }
+    
+    // Check if we have valid tier data
+    if (!parsed[tier] || !Array.isArray(parsed[tier]) || parsed[tier].length === 0) {
+        output.innerHTML = '<p>No treasure data available for the selected tier.</p>';
+        return;
+    }
     
     let result = pick(parsed[tier]);
     

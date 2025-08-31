@@ -690,6 +690,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function performManualSearch() {
     const searchInput = document.getElementById('searchInput');
+    if (!searchInput) {
+        console.error('Search input element not found');
+        return;
+    }
+    
     const query = searchInput.value.trim();
     
     if (!query) {
@@ -699,17 +704,31 @@ function performManualSearch() {
     }
     
     // Perform regular search and update URL
-    window.searchEngine.performSearch(query);
-    window.searchEngine.updateUrlParameters(query);
+    if (window.searchEngine) {
+        window.searchEngine.performSearch(query);
+        window.searchEngine.updateUrlParameters(query);
+    } else {
+        console.error('Search engine not initialized');
+    }
 }
 
 function performLuckySearch() {
     const searchInput = document.getElementById('searchInput');
+    if (!searchInput) {
+        console.error('Search input element not found');
+        return;
+    }
+    
     const query = searchInput.value.trim();
     
     if (!query) {
         alert('Please enter a search term first!');
         searchInput.focus();
+        return;
+    }
+    
+    if (!window.searchEngine) {
+        console.error('Search engine not initialized');
         return;
     }
     

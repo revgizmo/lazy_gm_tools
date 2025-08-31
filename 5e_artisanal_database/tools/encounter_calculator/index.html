@@ -831,7 +831,11 @@ function calculateEncounter() {
     
     charGroups.forEach(group => {
         const count = parseInt(group.querySelector('.char-count').value) || 0;
-        const level = parseInt(group.querySelector('.char-level').value) || 1;
+        let level = parseInt(group.querySelector('.char-level').value) || 1;
+        
+        // Validate level range
+        level = Math.max(1, Math.min(20, level));
+        
         const thresholds2014 = xpThresholds2014[level];
         
         totalChars += count;
@@ -850,8 +854,11 @@ function calculateEncounter() {
     let totalMonsterCR = 0;
     
     monsterGroups.forEach(group => {
-        const count = parseInt(group.querySelector('.monster-count').value) || 0;
+        let count = parseInt(group.querySelector('.monster-count').value) || 0;
         const cr = parseFloat(group.querySelector('.monster-cr').value) || 0;
+        
+        // Validate monster count
+        count = Math.max(0, Math.min(100, count));
         
         totalMonsters += count;
         baseMonsterXP += monsterXP[cr] * count;
