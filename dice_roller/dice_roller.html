@@ -190,6 +190,9 @@
                 rollStr += ` + ${modifier}`;
             }
             rollStr += ` = ${total}`;
+            if (rolls > 1) {
+                rollStr += ` (${total - modifier})`;
+            }
             rollStr += `<br>`;
             history.innerHTML = rollStr + history.innerHTML;
             history.scrollTop = 0;

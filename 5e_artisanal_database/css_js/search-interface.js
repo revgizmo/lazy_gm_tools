@@ -121,10 +121,8 @@ class SearchInterface {
     highlightText(text, query) {
         if (!query || !text) return text;
         
-        // Escape HTML to prevent XSS
-        const escapedText = this.escapeHtml(text);
         const words = query.split(/\s+/).filter(word => word.length > 0);
-        let highlightedText = escapedText;
+        let highlightedText = text;
         
         words.forEach(word => {
             const regex = new RegExp(`(${this.escapeRegExp(word)})`, 'gi');
@@ -132,15 +130,6 @@ class SearchInterface {
         });
         
         return highlightedText;
-    }
-
-    /**
-     * Escape HTML characters to prevent XSS
-     */
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
     }
 
     /**
@@ -193,14 +182,14 @@ class SearchInterface {
         if (!doc) return '';
 
         const snippet = this.generateSnippet(doc.content, query);
-        const categoryInfo = doc.category && doc.category !== 'root' ? ` > ${this.escapeHtml(doc.category)}` : '';
+        const categoryInfo = doc.category && doc.category !== 'root' ? ` > ${doc.category}` : '';
         
         return `
             <div class="result-item">
                 <div class="result-title">
-                    <a href="${this.escapeHtml(doc.url)}" target="_blank">${this.highlightText(doc.title, query)}</a>
+                    <a href="${doc.url}" target="_blank">${this.highlightText(doc.title, query)}</a>
                 </div>
-                <div class="result-source">${this.escapeHtml(doc.source)}${categoryInfo}</div>
+                <div class="result-source">${doc.source}${categoryInfo}</div>
                 <div class="result-snippet">${snippet}</div>
             </div>
         `;

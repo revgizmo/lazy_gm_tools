@@ -193,6 +193,9 @@ The code for this tool is released under a CC0 1.0 Universal license. You can co
                 rollStr += ` + ${modifier}`;
             }
             rollStr += ` = ${total}`;
+            if (rolls > 1) {
+                rollStr += ` (${total - modifier})`;
+            }
             rollStr += `<br>`;
             history.innerHTML = rollStr + history.innerHTML;
             history.scrollTop = 0;

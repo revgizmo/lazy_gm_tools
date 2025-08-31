@@ -244,20 +244,11 @@ function generateContent() {
         const template = pick(templates);
         const result = fillTemplate(template, parsed);
         const capitalizedResult = result.charAt(0).toUpperCase() + result.slice(1);
-        // Escape HTML to prevent XSS
-        const escapedResult = escapeHtml(capitalizedResult);
-        html += '<li>' + escapedResult + '</li>';
+        html += '<li>' + capitalizedResult + '</li>';
     }
     
     html += '</ol>';
     output.innerHTML = html;
-}
-
-// Helper function to escape HTML
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
 }
 
 // Treasure-specific generator function
@@ -287,8 +278,7 @@ function generateTreasure() {
     const items = result.split('<br>')
         .map(item => item.trim())
         .filter(item => item !== '')
-        .map(item => '- ' + item.charAt(0).toUpperCase() + item.slice(1))
-        .map(item => escapeHtml(item));
+        .map(item => '- ' + item.charAt(0).toUpperCase() + item.slice(1));
     
     output.innerHTML = '<p>' + items.join('<br>') + '</p>';
 }
